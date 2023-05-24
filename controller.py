@@ -84,6 +84,8 @@ def calculate_pose_angles(pose_world_landmarks):
   # Calculate shoulder Yaw in the Z=0 plane
   right_shoulder_yaw = angle(np.array([right_hip.x, right_hip.y]), np.array([right_shoulder.x, right_shoulder.y]), np.array([right_elbow.x, right_elbow.y]))
   
+  right_shoulder_roll = 90.0
+
   # Calculate shoulder Pitch
   yaw_cutoff = 30.0
   if (right_shoulder_yaw < yaw_cutoff or right_shoulder_yaw > 180.0-yaw_cutoff):
@@ -94,8 +96,10 @@ def calculate_pose_angles(pose_world_landmarks):
       # Use the Y=0 plane (top view) to calculate the pitch
       right_shoulder_pitch = 180.0-angle(np.array([right_elbow.x, right_elbow.z]), np.array([right_shoulder.x, right_shoulder.z]), np.array([left_shoulder.x, left_shoulder.z]))
       pitchmode = "Top View"
+
   
-  return right_elbow_angle,right_shoulder_yaw,right_shoulder_pitch,pitchmode
+  
+  return right_elbow_angle,right_shoulder_yaw,right_shoulder_pitch,right_shoulder_roll,pitchmode
 
 def calculate_finger_angles(joint_angles, joint_xyz):
   
@@ -550,11 +554,11 @@ with mp_holistic.Holistic(
     # Calculate pose angles
     if results.pose_world_landmarks is not None:
         # Grab our points of interest for easy access
-        right_elbow_angle,right_shoulder_yaw,right_shoulder_pitch,pitchmode = calculate_pose_angles(results.pose_world_landmarks)
+        right_elbow_angle,right_shoulder_yaw,right_shoulder_pitch,right_shoulder_roll,pitchmode = calculate_pose_angles(results.pose_world_landmarks)
 
         joint_angles[19] = right_shoulder_pitch
         joint_angles[20] = right_shoulder_yaw
-        joint_angles[21] = 0.0 # Right shoulder roll TBD
+        joint_angles[21] = right_shoulder_roll
         joint_angles[22] = right_elbow_angle
     else: # No arm detected
         is_valid_frame = False
